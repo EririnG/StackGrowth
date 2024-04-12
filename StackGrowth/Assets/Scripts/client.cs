@@ -6,7 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 
-public class client : MonoBehaviour
+public class client : SingleTonBehaviour<client>
 {
     public string server_ip = "127.0.0.1";
     public int m_Port = 50001;

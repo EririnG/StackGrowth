@@ -5,7 +5,7 @@ using UnityEngine;
 public class SingleTonBehaviour<T> : MonoBehaviour where T : MonoBehaviour
 {
     static T _instance = null;
-    public static T instance;
+    public static T instance
     {
         get
         {
