@@ -34,7 +34,14 @@ public class client : SingleTonBehaviour<client>
     // Update is called once per frame
     void Update()
     {
-        
+        // 마우스 클릭시 마다 패킷 클래스를 이용해서 위치 정보를 서버에 전송
+        if(Input.GetMouseButtonDown(0) == true)
+        {
+            simple_packet new_packet = new simple_packet();
+            new_packet.mouseX = Input.mousePosition.x;
+            new_packet.mouseY = Input.mousePosition.y; 
+            client.send(new_packet);
+        }
     }
 
     private void on_app_quit()
@@ -46,8 +53,18 @@ public class client : SingleTonBehaviour<client>
         }
     }
 
-    //public static void send(SimplePacket packet)
-    //{
+    public static void send(simple_packet packet)
+    {
+        if(client.instance.client_sock == null)
+        {
+            return;
+        }
+        byte[] send_date = simple_packet.to_byte_array(packet);
+        byte[] pref_size = new byte[1];
+        pref_size[0] = (byte)send_date.Length;
+        client.instance.client_sock.Send(pref_size);
+        client.instance.client_sock.Send(send_date);
 
-    //}
+        Debug.Log("Send Packet from Client : " + packet.mouseX.ToString() + "/" + packet.mouseY.ToString());
+    }
 }
