@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using UnityEngine.Networking;
 using System.Text;
 using TMPro;
+using static Unity.Networking.Transport.Utilities.ReliableUtility;
 
 
 public class Auth : MonoBehaviour
@@ -50,8 +51,15 @@ public class Auth : MonoBehaviour
         try
         {
             NetworkStream stream = conn_sock.GetStream();
-            string message = id_field.text;
-            byte[] data = Encoding.UTF8.GetBytes(message);
+            Packet packet = new Packet();
+            
+            packet.p_header.pack_id = (short)PACKET_ID.Login;
+            LoginPack login_pack = new LoginPack();
+            login_pack.id = Encoding.UTF8.GetBytes(id_field.text);
+            login_pack.pw = Encoding.UTF8.GetBytes(pw_field.text);
+            packet.p_header.total_size = (short)(5 + 2*(id_field.text.Length + pw_field.text.Length)) ;
+            
+            byte[] data = Encoding.UTF8.GetBytes(packet);
 
             stream.Write(data, 0, data.Length);
             

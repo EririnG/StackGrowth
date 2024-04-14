@@ -25,13 +25,13 @@ public class PktHeader
 
 public class PktBody
 {
-    byte data;
+    byte[] data;
 }
 
 public class LoginPack : PktBody
 {
-    public string id;
-    public string pw;
-    
+    public byte[] id;
+    public byte[] pw;
+
 
 }
