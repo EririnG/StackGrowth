@@ -25,6 +25,7 @@ public class Auth : MonoBehaviour
     [SerializeField]
     TMP_InputField register_pw_repeat_field;
 
+    public GameObject pw_check_panel;
 
 
     public string server_ip = "127.0.0.1";
@@ -41,7 +42,7 @@ public class Auth : MonoBehaviour
 
         try
         {
-            conn_sock = new TcpClient("127.0.0.1", 50001);
+            conn_sock = new TcpClient("127.0.0.1", 50002);
             Console.WriteLine("서버에 연결되었습니다.");
         }
         catch (Exception e)
@@ -59,14 +60,6 @@ public class Auth : MonoBehaviour
         try
         {
             NetworkStream stream = conn_sock.GetStream();
-
-            //Packet packet = new Packet();
-            //packet.p_header.pack_id = (short)PACKET_ID.Login;
-            //LoginPack login_pack = new LoginPack();
-            //login_pack.id = Encoding.UTF8.GetBytes(id_field.text);
-            //login_pack.pw = Encoding.UTF8.GetBytes(pw_field.text);
-            //packet.p_header.total_size = (short)(5 + 2*(id_field.text.Length + pw_field.text.Length)) ;
-
 
             string msg = 22 + "/" + login_id_field.text + "/" + login_pw_field.text;
             byte[] data = Encoding.UTF8.GetBytes(msg);
@@ -86,29 +79,37 @@ public class Auth : MonoBehaviour
 
     private void send_register_msg()
     {
-        if (conn_sock == null)
+        if(register_pw_field.text != register_pw_repeat_field.text)
         {
-            return;
+            pw_check_panel.gameObject.SetActive(true);
         }
-        try
+        else
         {
-            NetworkStream stream = conn_sock.GetStream();
+            if (conn_sock == null)
+            {
+                return;
+            }
+            try
+            {
+                NetworkStream stream = conn_sock.GetStream();
 
 
-            string msg = login_id_field.text + "/" + login_pw_field.text;
-            byte[] data = Encoding.UTF8.GetBytes(msg);
+                string msg = 21 + "/" + register_nick_field.text + "/" + register_id_field.text + "/" + register_pw_field.text;
+                byte[] data = Encoding.UTF8.GetBytes(msg);
 
-            stream.Write(data, 0, data.Length);
+                stream.Write(data, 0, data.Length);
 
-            Console.WriteLine("데이터를 서버로 전송했습니다.");
+                Console.WriteLine("데이터를 서버로 전송했습니다.");
 
-            //stream.Close();
-            //conn_sock.Close();
+                //stream.Close();
+                //conn_sock.Close();
+            }
+            catch (SocketException e)
+            {
+                Debug.Log("Socket Exception " + e);
+            }
         }
-        catch (SocketException e)
-        {
-            Debug.Log("Socket Exception " + e);
-        }
+        
     }
 
 
