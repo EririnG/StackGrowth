@@ -6,10 +6,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 using System.Runtime.InteropServices;
-using UnityEngine.Networking;
 using System.Text;
 using TMPro;
-using static Unity.Networking.Transport.Utilities.ReliableUtility;
 
 
 public class Auth : MonoBehaviour
