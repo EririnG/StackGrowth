@@ -51,15 +51,17 @@ public class Auth : MonoBehaviour
         try
         {
             NetworkStream stream = conn_sock.GetStream();
-            Packet packet = new Packet();
-            
-            packet.p_header.pack_id = (short)PACKET_ID.Login;
-            LoginPack login_pack = new LoginPack();
-            login_pack.id = Encoding.UTF8.GetBytes(id_field.text);
-            login_pack.pw = Encoding.UTF8.GetBytes(pw_field.text);
-            packet.p_header.total_size = (short)(5 + 2*(id_field.text.Length + pw_field.text.Length)) ;
-            
-            byte[] data = Encoding.UTF8.GetBytes(packet);
+
+            //Packet packet = new Packet();
+            //packet.p_header.pack_id = (short)PACKET_ID.Login;
+            //LoginPack login_pack = new LoginPack();
+            //login_pack.id = Encoding.UTF8.GetBytes(id_field.text);
+            //login_pack.pw = Encoding.UTF8.GetBytes(pw_field.text);
+            //packet.p_header.total_size = (short)(5 + 2*(id_field.text.Length + pw_field.text.Length)) ;
+
+
+            string msg = id_field.text + "/" + pw_field.text;
+            byte[] data = Encoding.UTF8.GetBytes(msg);
 
             stream.Write(data, 0, data.Length);
             
