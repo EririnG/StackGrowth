@@ -15,9 +15,19 @@ using static Unity.Networking.Transport.Utilities.ReliableUtility;
 public class Auth : MonoBehaviour
 {
     [SerializeField]
-    TMP_InputField id_field;
+    TMP_InputField login_id_field;
     [SerializeField]
-    TMP_InputField pw_field;
+    TMP_InputField login_pw_field;
+    [SerializeField]
+    TMP_InputField register_nick_field;
+    [SerializeField]
+    TMP_InputField register_id_field;
+    [SerializeField]
+    TMP_InputField register_pw_field;
+    [SerializeField]
+    TMP_InputField register_pw_repeat_field;
+
+
 
     public string server_ip = "127.0.0.1";
     public int server_port = 50001;
@@ -42,7 +52,7 @@ public class Auth : MonoBehaviour
         }
     }
 
-    private void send_msg()
+    private void send_login_msg()
     {
         if (conn_sock == null)
         {
@@ -60,7 +70,7 @@ public class Auth : MonoBehaviour
             //packet.p_header.total_size = (short)(5 + 2*(id_field.text.Length + pw_field.text.Length)) ;
 
 
-            string msg = id_field.text + "/" + pw_field.text;
+            string msg = 22 + "/" + login_id_field.text + "/" + login_pw_field.text;
             byte[] data = Encoding.UTF8.GetBytes(msg);
 
             stream.Write(data, 0, data.Length);
@@ -75,6 +85,36 @@ public class Auth : MonoBehaviour
             Debug.Log("Socket Exception " + e);
         }
     }
+
+    private void send_register_msg()
+    {
+        if (conn_sock == null)
+        {
+            return;
+        }
+        try
+        {
+            NetworkStream stream = conn_sock.GetStream();
+
+
+            string msg = login_id_field.text + "/" + login_pw_field.text;
+            byte[] data = Encoding.UTF8.GetBytes(msg);
+
+            stream.Write(data, 0, data.Length);
+
+            Console.WriteLine("데이터를 서버로 전송했습니다.");
+
+            //stream.Close();
+            //conn_sock.Close();
+        }
+        catch (SocketException e)
+        {
+            Debug.Log("Socket Exception " + e);
+        }
+    }
+
+
+
     // Update is called once per frame
     void Update()
     {
@@ -87,9 +127,12 @@ public class Auth : MonoBehaviour
 
     public void Login()
     {
-        Debug.Log(id_field.text);
-        Debug.Log(pw_field.text);
-        send_msg();
+        send_login_msg();
+    }
+
+    public void Register()
+    {
+        send_register_msg();
     }
 
 }

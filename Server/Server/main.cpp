@@ -13,8 +13,10 @@
 #include <iostream>
 #include <string.h>
 #include <thread>
-#include "packet.h"
 #include <cstring>
+
+#include "packet.h"
+#include "proc.h"
 
 
 
@@ -76,6 +78,39 @@ void packet_proc(SOCKET sock, char* p_packet)
 	}
 }
 
+void p_proc(SOCKET sock, char* buf)
+{
+	char* p_id;
+	char* data = NULL;
+	p_id = strtok_s(buf, "/", &data);
+
+	switch (stoi(p_id))
+	{
+	case static_cast<int>(PACKET_ID::REGISTER):
+		cout << "herehrdsadsahe" << endl;
+		break;
+
+	case static_cast<int>(PACKET_ID::LOGIN):
+		login_proc(data);
+		break;
+
+	default:
+		break;
+	}
+
+	char* id = NULL;
+	char* pw = NULL;
+
+	//cout << "Recv ID : " << id << endl;
+	//cout << "Recv PW : " << pw << endl;
+	//cout << "Recv Data : " << buf << endl;
+	//int result_code = send(sock, buf, recv_size, 0);
+
+	//printf("[recv : %d]\n", recv_size);
+
+	int read_pos = 0;
+}
+
 
 
 int main(int argc, char* argv[])
@@ -127,27 +162,33 @@ int main(int argc, char* argv[])
 		while (1)
 		{
 			int recv_size = recv(cli_sock, buf, BUFSIZE, 0);
-			if(recv_size > 0)
-				buf[recv_size] = '\0';
-			
-			char* packet_id;
-			char* id = NULL;
-			char* pw = NULL;
-			id=  strtok_s(buf, "/", &pw);
-			cout << "Recv ID : " << id << endl;
-			cout << "Recv PW : " << pw << endl;
-
-
-			cout << "Recv Data : " << buf << endl;
-			cout << "Recv Len : " << recv_size << endl;
-			int result_code = send(cli_sock, buf, recv_size, 0);
-			
 			if (recv_size == SOCKET_ERROR)
 			{
 				err_display("Recv()");
 				break;
 			}
+			if(recv_size > 0)
+				buf[recv_size] = '\0';
+
 			printf("[recv : %d]\n", recv_size);
+
+			p_proc(cli_sock, buf);
+
+		/*	char* p_id;
+			char* data = NULL;
+			p_id =  strtok_s(buf, "/", &data);
+			
+
+			char* id = NULL;
+			char* pw = NULL;
+
+			cout << "Recv ID : " << id << endl;
+			cout << "Recv PW : " << pw << endl;
+
+			cout << "Recv Data : " << buf << endl;
+			cout << "Recv Len : " << recv_size << endl;
+			int result_code = send(cli_sock, buf, recv_size, 0);*/
+			
 
 			int read_pos = 0;
 			/*while (recv_size >= PACKET_HEADER_SIZE)
