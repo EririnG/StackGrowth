@@ -130,7 +130,8 @@ int main(int argc, char* argv[])
 			if(recv_size > 0)
 				buf[recv_size] = '\0';
 			
-			char* id;
+			char* packet_id;
+			char* id = NULL;
 			char* pw = NULL;
 			id=  strtok_s(buf, "/", &pw);
 			cout << "Recv ID : " << id << endl;
