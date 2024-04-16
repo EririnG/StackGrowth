@@ -41,6 +41,7 @@ static bool dead_flag = false;
 // 총 소켓 수를 체크하는 변수
 int total_sockets = 0;
 
+int check = 0;
 
 
 // 소켓 함수 오류 출력 후 종류
@@ -92,10 +93,77 @@ void login_proc(SOCKET cli_sock ,char* buf)
 {
 	char* id = NULL;
 	char* pw = NULL;
+	char query[1024];
 	id = strtok_s(buf, "/", &pw);
 
 	cout << "Recv ID : " << id << endl;
 	cout << "Recv PW : " << pw << endl;
+
+	vaildate_log_id(cli_sock, id);
+	if (check == 0)
+		return;
+	vaildate_log_pw(cli_sock, id, pw);
+	if (check == 0)
+		return;
+
+	send(cli_sock, "0", 1, 0);
+}
+
+void vaildate_log_id(SOCKET cli_sock, char* id)
+{
+	char query[1024];
+	int rowCount;
+	MYSQL_RES* result;
+	MYSQL_ROW row;
+
+	sprintf_s(query, "SELECT COUNT(*) FROM erin_db.user_info WHERE id = '%s'", id);
+	if (!mysql_query(&mysql, query))
+	{
+		cout << "아이디 존재여부 확인 성공" << endl;
+	}
+	else
+	{
+		cout << "존재 검사 실패\n에러 원인 :" << mysql_error(&mysql) << endl;
+	}
+	result = mysql_store_result(&mysql);
+	row = mysql_fetch_row(result);
+	rowCount = std::stoi(row[0]);
+	if (rowCount > 0)
+	{
+		check = 1;
+		return;
+	}
+	send(cli_sock, "1", 1, 0);
+	check = 0;
+}
+
+void vaildate_log_pw(SOCKET cli_sock, char* id, char* pw)
+{
+	char query[1024];
+	int rowCount;
+	MYSQL_RES* result;
+	MYSQL_ROW row;
+
+	sprintf_s(query, "SELECT pw FROM erin_db.user_info WHERE id = '%s'", id);
+	if (!mysql_query(&mysql, query))
+	{
+		cout << "비밀번호 찾기 성공" << endl;
+	}
+	else
+	{
+		cout << "비밀번호 찾기 실패\n에러 원인 :" << mysql_error(&mysql) << endl;
+	}
+	result = mysql_store_result(&mysql);
+	row = mysql_fetch_row(result);
+	rowCount = std::stoi(row[0]);
+
+	if (rowCount == atoi(pw))
+	{
+		check = 1;
+		return;
+	}
+	send(cli_sock, "2", 1, 0);
+	check = 0;
 }
 
 void register_proc(SOCKET cli_sock, char* buf)
@@ -113,14 +181,19 @@ void register_proc(SOCKET cli_sock, char* buf)
 	cout << "pw : " << pw << endl;
 
 
-	vaildate_nickname(cli_sock,nick, id);
+	vaildate_nickname(cli_sock,nick);
+	if (check == 0)
+		return;
+	vaildate_id(cli_sock, id);
+	if (check == 0)
+		return;
 
-	/*strcpy(query, "INSERT INTO 'erin_db' ('name','id','pw') VALUSE ('%s','%s','%s')", nick, id, pw);*/
 	sprintf_s(query, "INSERT INTO `erin_db`.`user_info` (`name`,`id`,`pw`) VALUES ('%s','%s','%s')", nick, id, pw);
 		
 	if (!mysql_query(&mysql, query))
 	{
 		cout << "회원가입 성공" << endl;
+		send(cli_sock, "0", 1, 0);
 	}
 	else
 	{
@@ -128,7 +201,7 @@ void register_proc(SOCKET cli_sock, char* buf)
 	}
 }
 
-void vaildate_nickname(SOCKET cli_sock, char* nick, char* id)
+void vaildate_nickname(SOCKET cli_sock, char* nick)
 {
 	char query[1024];
 	int rowCount;
@@ -139,24 +212,25 @@ void vaildate_nickname(SOCKET cli_sock, char* nick, char* id)
 	sprintf_s(query, "SELECT COUNT(*) FROM erin_db.user_info WHERE name = '%s'", nick);
 	if (!mysql_query(&mysql, query))
 	{
-		cout << "닉네임 검사 성공" << endl;
+		cout << "닉네임 중복 검사 성공" << endl;
 	}
 	else
 	{
-		cout << "닉네임 검사 실패\n에러 원인 :" << mysql_error(&mysql) << endl;
+		cout << "닉네임 중복 검사 실패\n에러 원인 :" << mysql_error(&mysql) << endl;
 	}	
 	result = mysql_store_result(&mysql);
 	row = mysql_fetch_row(result);
 	rowCount = std::stoi(row[0]);
-	cout << rowCount << endl;
 	if (rowCount > 0)
 	{
 		send(cli_sock, "1", 1, 0);
+		check = 0;
+		return;
 	}
-	exit(1);
+	check = 1;
 }
 
-void vaildate_id(SOCKET cli_sock, char* nick, char* id)
+void vaildate_id(SOCKET cli_sock, char* id)
 {
 	char query[1024];
 	int rowCount;
@@ -164,10 +238,10 @@ void vaildate_id(SOCKET cli_sock, char* nick, char* id)
 	MYSQL_ROW row;
 
 	// 닉네임 중복 검사
-	sprintf_s(query, "SELECT COUNT(*) FROM erin_db.user_info WHERE name = '%s'", nick);
+	sprintf_s(query, "SELECT COUNT(*) FROM erin_db.user_info WHERE id = '%s'", id);
 	if (!mysql_query(&mysql, query))
 	{
-		cout << "닉네임 검사 성공" << endl;
+		cout << "아이디 중복 검사 성공" << endl;
 	}
 	else
 	{
@@ -176,12 +250,13 @@ void vaildate_id(SOCKET cli_sock, char* nick, char* id)
 	result = mysql_store_result(&mysql);
 	row = mysql_fetch_row(result);
 	rowCount = std::stoi(row[0]);
-	cout << rowCount << endl;
 	if (rowCount > 0)
 	{
-		send(cli_sock, "1", 1, 0);
+		send(cli_sock, "2", 1, 0);
+		check = 0;
+		return;
 	}
-	exit(1);
+	check = 1;
 }
 
 
@@ -196,7 +271,6 @@ void p_proc(SOCKET cli_sock, char* buf)
 	switch (stoi(p_id))
 	{
 	case static_cast<int>(PACKET_ID::REGISTER):
-		cout << "일단 여기는 옴" << endl;
 		register_proc(cli_sock,data);
 		break;
 

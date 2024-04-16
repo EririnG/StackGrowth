@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using TMPro;
 using System.Threading.Tasks;
-
+using UnityEngine.SceneManagement;
 
 public class Auth : MonoBehaviour
 {
@@ -27,9 +27,11 @@ public class Auth : MonoBehaviour
     TMP_InputField register_pw_repeat_field;
 
     public GameObject suc_reg_panel;
+    public GameObject suc_login_panel;
     public GameObject pw_check_panel;
     public GameObject nick_check_panel;
     public GameObject id_check_panel;
+    public GameObject id_login_check_panel;
 
     public string server_ip = "127.0.0.1";
     public int server_port = 50002;
@@ -71,14 +73,30 @@ public class Auth : MonoBehaviour
             stream.Write(data, 0, data.Length);
 
             Console.WriteLine("데이터를 서버로 전송했습니다.");
-
-            //stream.Close();
-            //conn_sock.Close();
         }
         catch (SocketException e)
         {
             Debug.Log("Socket Exception " + e);
         }
+
+        int res = ReadData();
+        Debug.Log(res);
+        switch (res)
+        {
+            case 0:
+                suc_login_panel.gameObject.SetActive(true);
+                StartCoroutine(LoadNextSceneDelay(3f));
+                break;
+            case 1:
+                id_login_check_panel.gameObject.SetActive(true);
+                break;
+            case 2:
+                pw_check_panel.gameObject.SetActive(true);
+                break;
+            default:
+                break;
+        }
+
     }
 
     private void send_register_msg()
@@ -112,6 +130,7 @@ public class Auth : MonoBehaviour
         }
 
         int res = ReadData();
+        Debug.Log(res);
         switch (res)
         {
             case 0:
@@ -131,8 +150,10 @@ public class Auth : MonoBehaviour
     int ReadData()
     {
         byte[] buffer = new byte[1024];
-        int res = stream.Read(buffer, 0, buffer.Length);
-        return res;
+        stream.Read(buffer, 0, buffer.Length);
+        string data = Encoding.UTF8.GetString(buffer);
+        Debug.Log(data);
+        return int.Parse(data);
     }
 
 // Update is called once per frame
@@ -151,5 +172,10 @@ void Update()
         send_register_msg();
     }
 
+    IEnumerator LoadNextSceneDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        SceneManager.LoadScene("Topdown");
+    }
 
 }
