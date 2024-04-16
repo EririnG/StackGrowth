@@ -48,6 +48,7 @@ public class ClientManager : MonoBehaviour
     public GameObject suc_post_panel;
 
 
+    private spawner postManagerInstance;
     // sever
 
     public string server_ip = "127.0.0.1";
@@ -60,6 +61,8 @@ public class ClientManager : MonoBehaviour
     void Start()
     {
         conn_serv();
+        GameObject postManagerObject = GameObject.Find("PostManager");
+        postManagerInstance = postManagerObject.GetComponent<spawner>();
     }
 
     private void conn_serv()
@@ -226,8 +229,9 @@ public class ClientManager : MonoBehaviour
             read_data = read_data + parts[i - 1] + "/";
             if (i % 4 == 0)
             {
-                //spawner.Instance.spawn(read_data);
+                postManagerInstance.spawn(read_data);
                 Debug.Log(read_data);
+                read_data = "";
             }
                 
         }
