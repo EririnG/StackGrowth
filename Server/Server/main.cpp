@@ -4,7 +4,7 @@
 
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #define BUFSIZE 1024
-#define SERVERPORT 50001
+#define SERVERPORT 50002
 
 #include <winsock2.h>
 #include <Ws2tcpip.h>
@@ -14,13 +14,23 @@
 #include <string.h>
 #include <thread>
 #include <cstring>
+#include <mysql.h>
 
 #include "packet.h"
-#include "proc.h"
-
-
+#include "main.h"
 
 using namespace std;
+
+
+struct DBConnection
+{
+	const char* server = "localhost",
+		* user = "root",
+		* pw = "1234",
+		* db = "erin_db";
+}db_conn;
+
+MYSQL mysql;
 
 // 소켓 관련 전역 변수
 static SOCKET listen_sock;
@@ -31,6 +41,8 @@ static bool dead_flag = false;
 // 총 소켓 수를 체크하는 변수
 int total_sockets = 0;
 
+int scene = 1;
+int check = 0;
 
 
 // 소켓 함수 오류 출력 후 종류
@@ -78,49 +90,222 @@ void packet_proc(SOCKET sock, char* p_packet)
 	}
 }
 
-void p_proc(SOCKET sock, char* buf)
+void login_proc(SOCKET cli_sock ,char* buf)
+{
+	char* id = NULL;
+	char* pw = NULL;
+	char query[1024];
+	id = strtok_s(buf, "/", &pw);
+
+	cout << "Recv ID : " << id << endl;
+	cout << "Recv PW : " << pw << endl;
+
+	vaildate_log_id(cli_sock, id);
+	if (check == 0)
+		return;
+	vaildate_log_pw(cli_sock, id, pw);
+	if (check == 0)
+		return;
+
+	send(cli_sock, "0", 1, 0);
+	scene = 0;
+}
+
+void vaildate_log_id(SOCKET cli_sock, char* id)
+{
+	char query[1024];
+	int rowCount;
+	MYSQL_RES* result;
+	MYSQL_ROW row;
+
+	sprintf_s(query, "SELECT COUNT(*) FROM erin_db.user_info WHERE id = '%s'", id);
+	if (!mysql_query(&mysql, query))
+	{
+		cout << "아이디 존재여부 확인 성공" << endl;
+	}
+	else
+	{
+		cout << "존재 검사 실패\n에러 원인 :" << mysql_error(&mysql) << endl;
+	}
+	result = mysql_store_result(&mysql);
+	row = mysql_fetch_row(result);
+	rowCount = std::stoi(row[0]);
+	if (rowCount > 0)
+	{
+		check = 1;
+		return;
+	}
+	send(cli_sock, "1", 1, 0);
+	check = 0;
+}
+
+void vaildate_log_pw(SOCKET cli_sock, char* id, char* pw)
+{
+	char query[1024];
+	int rowCount;
+	MYSQL_RES* result;
+	MYSQL_ROW row;
+
+	sprintf_s(query, "SELECT pw FROM erin_db.user_info WHERE id = '%s'", id);
+	if (!mysql_query(&mysql, query))
+	{
+		cout << "비밀번호 찾기 성공" << endl;
+	}
+	else
+	{
+		cout << "비밀번호 찾기 실패\n에러 원인 :" << mysql_error(&mysql) << endl;
+	}
+	result = mysql_store_result(&mysql);
+	row = mysql_fetch_row(result);
+	rowCount = std::stoi(row[0]);
+
+	if (rowCount == atoi(pw))
+	{
+		check = 1;
+		return;
+	}
+	send(cli_sock, "2", 1, 0);
+	check = 0;
+}
+
+void register_proc(SOCKET cli_sock, char* buf)
+{
+	char* nick = NULL;
+	char* id = NULL;
+	char* pw = NULL;
+	char query[1024];
+	
+	nick = strtok_s(buf, "/", &id);
+	cout << "nick : " << nick << endl;
+	cout << "남은데이터 : " << id << endl;
+	id = strtok_s(id, "/", &pw);
+	cout << "id : " << id << endl;
+	cout << "pw : " << pw << endl;
+
+
+	vaildate_nickname(cli_sock,nick);
+	if (check == 0)
+		return;
+	vaildate_id(cli_sock, id);
+	if (check == 0)
+		return;
+
+	sprintf_s(query, "INSERT INTO `erin_db`.`user_info` (`name`,`id`,`pw`) VALUES ('%s','%s','%s')", nick, id, pw);
+		
+	if (!mysql_query(&mysql, query))
+	{
+		cout << "회원가입 성공" << endl;
+		send(cli_sock, "0", 1, 0);
+	}
+	else
+	{
+		cout << "회원가입 실패\n에러 원인 :"<< mysql_error(&mysql) << endl;
+	}
+}
+
+void vaildate_nickname(SOCKET cli_sock, char* nick)
+{
+	char query[1024];
+	int rowCount;
+	MYSQL_RES* result;
+	MYSQL_ROW row;
+	
+	// 닉네임 중복 검사
+	sprintf_s(query, "SELECT COUNT(*) FROM erin_db.user_info WHERE name = '%s'", nick);
+	if (!mysql_query(&mysql, query))
+	{
+		cout << "닉네임 중복 검사 성공" << endl;
+	}
+	else
+	{
+		cout << "닉네임 중복 검사 실패\n에러 원인 :" << mysql_error(&mysql) << endl;
+	}	
+	result = mysql_store_result(&mysql);
+	row = mysql_fetch_row(result);
+	rowCount = std::stoi(row[0]);
+	if (rowCount > 0)
+	{
+		send(cli_sock, "1", 1, 0);
+		check = 0;
+		return;
+	}
+	check = 1;
+}
+
+void vaildate_id(SOCKET cli_sock, char* id)
+{
+	char query[1024];
+	int rowCount;
+	MYSQL_RES* result;
+	MYSQL_ROW row;
+
+	// 닉네임 중복 검사
+	sprintf_s(query, "SELECT COUNT(*) FROM erin_db.user_info WHERE id = '%s'", id);
+	if (!mysql_query(&mysql, query))
+	{
+		cout << "아이디 중복 검사 성공" << endl;
+	}
+	else
+	{
+		cout << "닉네임 검사 실패\n에러 원인 :" << mysql_error(&mysql) << endl;
+	}
+	result = mysql_store_result(&mysql);
+	row = mysql_fetch_row(result);
+	rowCount = std::stoi(row[0]);
+	if (rowCount > 0)
+	{
+		send(cli_sock, "2", 1, 0);
+		check = 0;
+		return;
+	}
+	check = 1;
+}
+
+
+void p_proc(SOCKET cli_sock, char* buf)
 {
 	char* p_id;
 	char* data = NULL;
 	p_id = strtok_s(buf, "/", &data);
 
+
+
 	switch (stoi(p_id))
 	{
 	case static_cast<int>(PACKET_ID::REGISTER):
-		cout << "herehrdsadsahe" << endl;
+		register_proc(cli_sock,data);
 		break;
 
 	case static_cast<int>(PACKET_ID::LOGIN):
-		login_proc(data);
+		login_proc(cli_sock,data);
 		break;
 
 	default:
 		break;
 	}
 
-	char* id = NULL;
-	char* pw = NULL;
-
-	//cout << "Recv ID : " << id << endl;
-	//cout << "Recv PW : " << pw << endl;
-	//cout << "Recv Data : " << buf << endl;
-	//int result_code = send(sock, buf, recv_size, 0);
-
-	//printf("[recv : %d]\n", recv_size);
-
-	int read_pos = 0;
 }
 
 
 
 int main(int argc, char* argv[])
 {
+
 	int retval;
 
 	// 윈속 초기화
 	WSADATA wsa;
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
 		return 1;
+	// mysql 연결
+	mysql_init(&mysql);
+	if (mysql_real_connect(&mysql, db_conn.server, db_conn.user, db_conn.pw, db_conn.db, 50001, NULL, 0))
+	{
+		cout << "MySQL 버젼 : " << mysql_get_client_info() << endl;
+		mysql_set_character_set(&mysql, "utf8");
+	}
+	else
+		cout << "MySQL 연결 실패 \n에러 원인 : "<< mysql_error(&mysql) << endl;
 
 	// sock()
 	listen_sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -132,14 +317,13 @@ int main(int argc, char* argv[])
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	serv_addr.sin_port = htons(SERVERPORT);
-	retval = bind(listen_sock, (SOCKADDR*)&serv_addr, sizeof(serv_addr));
+	retval = ::bind(listen_sock, (SOCKADDR*)&serv_addr, sizeof(serv_addr));
 	if (retval == SOCKET_ERROR)
 		err_quit("Bind()");
 	// listen()
 	retval = listen(listen_sock, SOMAXCONN);
 	if (retval == SOCKET_ERROR)
 		err_quit("Listen()");
-
 	while (1)
 	{
 		SOCKADDR_IN cli_addr;
@@ -159,9 +343,10 @@ int main(int argc, char* argv[])
 		// 클라이언트와 데이터 통신
 		char buf[BUFSIZE + 1];
 		
-		while (1)
+		while (scene)
 		{
 			int recv_size = recv(cli_sock, buf, BUFSIZE, 0);
+			string msg = buf;
 			if (recv_size == SOCKET_ERROR)
 			{
 				err_display("Recv()");
@@ -174,23 +359,7 @@ int main(int argc, char* argv[])
 
 			p_proc(cli_sock, buf);
 
-		/*	char* p_id;
-			char* data = NULL;
-			p_id =  strtok_s(buf, "/", &data);
-			
 
-			char* id = NULL;
-			char* pw = NULL;
-
-			cout << "Recv ID : " << id << endl;
-			cout << "Recv PW : " << pw << endl;
-
-			cout << "Recv Data : " << buf << endl;
-			cout << "Recv Len : " << recv_size << endl;
-			int result_code = send(cli_sock, buf, recv_size, 0);*/
-			
-
-			int read_pos = 0;
 			/*while (recv_size >= PACKET_HEADER_SIZE)
 			{
 				PktHeader* p_header = (PktHeader*)&buf[read_pos];
@@ -201,12 +370,13 @@ int main(int argc, char* argv[])
 				recv_size -= p_header->total_size;
 			}*/
 		}
-
+		scene = 1;
 		closesocket(cli_sock);
-		printf("[TCP 서버] 클라이언트 종류 : IP 주소 : %s, 포트 번호 : %d\n", cli_ip, ntohs(cli_addr.sin_port));
+		printf("[TCP 서버] 클라이언트 종료 : IP 주소 : %s, 포트 번호 : %d\n", cli_ip, ntohs(cli_addr.sin_port));
 	}
 
 	closesocket(listen_sock);
+	mysql_close(&mysql);
 	WSACleanup();
 	return 0;
 }

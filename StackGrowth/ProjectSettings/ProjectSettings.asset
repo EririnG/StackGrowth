@@ -650,6 +650,7 @@ PlayerSettings:
   metroTileBackgroundColor: {r: 0.13333334, g: 0.17254902, b: 0.21568628, a: 0}
   metroSplashScreenBackgroundColor: {r: 0.12941177, g: 0.17254902, b: 0.21568628, a: 1}
   metroSplashScreenUseBackgroundColor: 0
+  syncCapabilities: 0
   platformCapabilities: {}
   metroTargetDeviceFamilies: {}
   metroFTAName: 
@@ -704,11 +705,11 @@ PlayerSettings:
   apiCompatibilityLevel: 6
   activeInputHandler: 0
   windowsGamepadBackendHint: 0
-  cloudProjectId: 177014ae-568e-4a33-82ad-ef9a0cafcacd
+  cloudProjectId: 77fdd973-41ed-455f-9afd-4bdc7c542a4d
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: GoldMetal-2D
-  organizationId: bbuchu123
+  projectName: StackGrowth 2024-04-10_23-26-43
+  organizationId: qwey1584
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}

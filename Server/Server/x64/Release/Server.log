@@ -1,0 +1,7 @@
+﻿  main.cpp
+C:\Users\Erin\Documents\GitHub\StackGrowth\Server\Server\main.cpp(133,2): error C2065: 'serv_addr': 선언되지 않은 식별자입니다.
+C:\Users\Erin\Documents\GitHub\StackGrowth\Server\Server\main.cpp(134,2): error C2065: 'serv_addr': 선언되지 않은 식별자입니다.
+C:\Users\Erin\Documents\GitHub\StackGrowth\Server\Server\main.cpp(135,2): error C2065: 'serv_addr': 선언되지 않은 식별자입니다.
+C:\Users\Erin\Documents\GitHub\StackGrowth\Server\Server\main.cpp(136,2): error C2065: 'serv_addr': 선언되지 않은 식별자입니다.
+C:\Users\Erin\Documents\GitHub\StackGrowth\Server\Server\main.cpp(137,43): error C2065: 'serv_addr': 선언되지 않은 식별자입니다.
+C:\Users\Erin\Documents\GitHub\StackGrowth\Server\Server\main.cpp(137,61): error C2065: 'serv_addr': 선언되지 않은 식별자입니다.
