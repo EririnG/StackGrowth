@@ -2352,7 +2352,7 @@ GameObject:
   - component: {fileID: 503559661}
   - component: {fileID: 503559660}
   m_Layer: 0
-  m_Name: Auth
+  m_Name: ClientManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

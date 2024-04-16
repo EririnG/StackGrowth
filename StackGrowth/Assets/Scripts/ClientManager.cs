@@ -11,7 +11,8 @@ using TMPro;
 using System.Threading.Tasks;
 using UnityEngine.SceneManagement;
 
-public class Auth : SingleTonBehaviour<Auth>
+//public class ClientManager : SingleTonBehaviour<ClientManager>
+public class ClientManager : MonoBehaviour
 {
     [SerializeField]
     TMP_InputField login_id_field;
@@ -147,6 +148,9 @@ public class Auth : SingleTonBehaviour<Auth>
         }
     }
 
+    //void send_post_msg()
+
+
     int ReadData()
     {
         byte[] buffer = new byte[1024];
@@ -170,6 +174,11 @@ void Update()
     public void Register()
     {
         send_register_msg();
+    }
+
+    public void Post()
+    {
+        //send_post_msg();
     }
 
     IEnumerator LoadNextSceneDelay(float delay)
