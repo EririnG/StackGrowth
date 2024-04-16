@@ -68,6 +68,11 @@ public class spawner : MonoBehaviour
         button.onClick.AddListener(() => panel.SetActive(true));
     }
 
+    public void delete()
+    {
+        Destroy()
+    }
+
     public void spawn_post(string buf)
     {
         string[] parts = buf.Split('/');
