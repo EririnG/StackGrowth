@@ -14,6 +14,7 @@ using UnityEngine.SceneManagement;
 //public class ClientManager : SingleTonBehaviour<ClientManager>
 public class ClientManager : MonoBehaviour
 {
+    // login
     [SerializeField]
     TMP_InputField login_id_field;
     [SerializeField]
@@ -33,6 +34,20 @@ public class ClientManager : MonoBehaviour
     public GameObject nick_check_panel;
     public GameObject id_check_panel;
     public GameObject id_login_check_panel;
+
+
+    // game
+    [SerializeField]
+    TMP_InputField post_title;
+    [SerializeField]
+    TMP_InputField post_author;
+    [SerializeField]
+    TMP_InputField post_content;
+
+    public GameObject suc_post_panel;
+
+
+    // sever
 
     public string server_ip = "127.0.0.1";
     public int server_port = 50002;
@@ -148,7 +163,33 @@ public class ClientManager : MonoBehaviour
         }
     }
 
-    //void send_post_msg()
+    void send_post_msg()
+    {
+        if (conn_sock == null)
+        {
+            return;
+        }
+        try
+        {
+            string msg = 23 + "/" + post_title.text + "/" + post_author.text + "/" + post_content.text;
+            byte[] data = Encoding.UTF8.GetBytes(msg);
+
+            stream.Write(data, 0, data.Length);
+
+            Console.WriteLine("데이터를 서버로 전송했습니다.");
+        }
+        catch (SocketException e)
+        {
+            Debug.Log("Socket Exception " + e);
+        }
+        int res = ReadData();
+        if (res == 0)
+        {
+            suc_reg_panel.gameObject.SetActive(true);
+        }
+        else
+            Debug.Log("뭔가 잘못댐");
+    }
 
 
     int ReadData()
@@ -161,7 +202,7 @@ public class ClientManager : MonoBehaviour
     }
 
 // Update is called once per frame
-void Update()
+    void Update()
     {
         
     }
@@ -178,7 +219,7 @@ void Update()
 
     public void Post()
     {
-        //send_post_msg();
+        send_post_msg();
     }
 
     IEnumerator LoadNextSceneDelay(float delay)

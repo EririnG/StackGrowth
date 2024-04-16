@@ -44,7 +44,6 @@ int total_sockets = 0;
 int scene = 1;
 int check = 0;
 
-
 // 소켓 함수 오류 출력 후 종류
 void err_quit(const char* msg)
 {
@@ -261,6 +260,33 @@ void vaildate_id(SOCKET cli_sock, char* id)
 	check = 1;
 }
 
+void post_proc(SOCKET cli_sock, char* buf)
+{
+	char* title = NULL;
+	char* author = NULL;
+	char* content = NULL;
+	char query[1024];
+
+	title = strtok_s(buf, "/", &author);
+	cout << "title : " << title << endl;
+	cout << "남은데이터 : " << author << endl;
+	author = strtok_s(author, "/", &content);
+	cout << "author : " << author << endl;
+	cout << "content : " << content << endl;
+
+	sprintf_s(query, "INSERT INTO `erin_db`.`post` (`id`,`title`,`author`,`content`) VALUES ('%d','%s','%s','%s')", rand(), title, author, content);
+
+	if (!mysql_query(&mysql, query))
+	{
+		cout << "게시글 성공" << endl;
+		send(cli_sock, "0", 1, 0);
+	}
+	else
+	{
+		cout << "게시글 실패\n에러 원인 :" << mysql_error(&mysql) << endl;
+	}
+}
+
 
 void p_proc(SOCKET cli_sock, char* buf)
 {
@@ -279,6 +305,9 @@ void p_proc(SOCKET cli_sock, char* buf)
 	case static_cast<int>(PACKET_ID::LOGIN):
 		login_proc(cli_sock,data);
 		break;
+	case static_cast<int>(PACKET_ID::POST):
+		post_proc(cli_sock, data);
+		break;
 
 	default:
 		break;
@@ -290,7 +319,7 @@ void p_proc(SOCKET cli_sock, char* buf)
 
 int main(int argc, char* argv[])
 {
-
+	srand((unsigned int)time(NULL));
 	int retval;
 
 	// 윈속 초기화
