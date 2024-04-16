@@ -27,11 +27,12 @@ public class Auth : MonoBehaviour
 
     public GameObject pw_check_panel;
 
-
     public string server_ip = "127.0.0.1";
-    public int server_port = 50001;
+    public int server_port = 50002;
     private TcpClient conn_sock;
+
     // Start is called before the first frame update
+    
     void Start()
     {
         conn_serv();
@@ -39,10 +40,9 @@ public class Auth : MonoBehaviour
 
     private void conn_serv()
     {
-
         try
         {
-            conn_sock = new TcpClient("127.0.0.1", 50002);
+            conn_sock = new TcpClient(server_ip, server_port);
             Console.WriteLine("서버에 연결되었습니다.");
         }
         catch (Exception e)
@@ -117,11 +117,7 @@ public class Auth : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.A) == true)
-        {
-            
-            Debug.Log("Send Packet from Client");
-        }
+        
     }
 
     public void Login()

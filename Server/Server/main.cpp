@@ -17,6 +17,7 @@
 #include <mysql.h>
 
 #include "packet.h"
+#include "main.h"
 
 using namespace std;
 
@@ -87,7 +88,7 @@ void packet_proc(SOCKET sock, char* p_packet)
 	}
 }
 
-void login_proc(char* buf)
+void login_proc(SOCKET cli_sock ,char* buf)
 {
 	char* id = NULL;
 	char* pw = NULL;
@@ -97,11 +98,13 @@ void login_proc(char* buf)
 	cout << "Recv PW : " << pw << endl;
 }
 
-void register_proc(char* buf)
+void register_proc(SOCKET cli_sock, char* buf)
 {
 	char* nick = NULL;
 	char* id = NULL;
 	char* pw = NULL;
+	char query[1024];
+	
 	nick = strtok_s(buf, "/", &id);
 	cout << "nick : " << nick << endl;
 	cout << "남은데이터 : " << id << endl;
@@ -109,11 +112,12 @@ void register_proc(char* buf)
 	cout << "id : " << id << endl;
 	cout << "pw : " << pw << endl;
 
-	char query[1024];
+
+	vaildate_register(cli_sock,nick, id);
+
 	/*strcpy(query, "INSERT INTO 'erin_db' ('name','id','pw') VALUSE ('%s','%s','%s')", nick, id, pw);*/
 	sprintf_s(query, "INSERT INTO `erin_db`.`user_info` (`name`,`id`,`pw`) VALUES ('%s','%s','%s')", nick, id, pw);
-	
-	
+		
 	if (!mysql_query(&mysql, query))
 	{
 		cout << "회원가입 성공" << endl;
@@ -124,21 +128,52 @@ void register_proc(char* buf)
 	}
 }
 
-void p_proc(SOCKET sock, char* buf)
+void vaildate_register(SOCKET cli_sock, char* nick, char* id)
+{
+	char query[1024];
+	int rowCount;
+	MYSQL_RES* result;
+	MYSQL_ROW row;
+	
+	// 닉네임 중복 검사
+	sprintf_s(query, "SELECT COUNT(*) FROM erin_db.user_info WHERE name = '%s'", nick);
+	if (!mysql_query(&mysql, query))
+	{
+		cout << "닉네임 검사 성공" << endl;
+	}
+	else
+	{
+		cout << "닉네임 검사 실패\n에러 원인 :" << mysql_error(&mysql) << endl;
+	}	
+	result = mysql_store_result(&mysql);
+	row = mysql_fetch_row(result);
+	rowCount = std::stoi(row[0]);
+	cout << rowCount << endl;
+	if (rowCount > 0)
+	{
+		send(cli_sock, "1", 1, 0);
+	}
+
+	exit(1);
+}
+
+void p_proc(SOCKET cli_sock, char* buf)
 {
 	char* p_id;
 	char* data = NULL;
 	p_id = strtok_s(buf, "/", &data);
 
+
+
 	switch (stoi(p_id))
 	{
 	case static_cast<int>(PACKET_ID::REGISTER):
 		cout << "일단 여기는 옴" << endl;
-		register_proc(data);
+		register_proc(cli_sock,data);
 		break;
 
 	case static_cast<int>(PACKET_ID::LOGIN):
-		login_proc(data);
+		login_proc(cli_sock,data);
 		break;
 
 	default:
@@ -168,8 +203,6 @@ int main(int argc, char* argv[])
 	else
 		cout << "MySQL 연결 실패 \n에러 원인 : "<< mysql_error(&mysql) << endl;
 
-	
-
 	// sock()
 	listen_sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (listen_sock == INVALID_SOCKET)
@@ -187,7 +220,6 @@ int main(int argc, char* argv[])
 	retval = listen(listen_sock, SOMAXCONN);
 	if (retval == SOCKET_ERROR)
 		err_quit("Listen()");
-
 	while (1)
 	{
 		SOCKADDR_IN cli_addr;
