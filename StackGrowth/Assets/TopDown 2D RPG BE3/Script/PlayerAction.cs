@@ -26,6 +26,11 @@ public class PlayerAction : MonoBehaviour
     bool isHorizonMove;
     //public GameManager manager;
 
+    // client
+    public string server_ip = "127.0.0.1";
+    public int server_port = 50002;
+    private TcpClient conn_sock;
+    NetworkStream stream;
 
     private void Awake()
     {
@@ -35,10 +40,22 @@ public class PlayerAction : MonoBehaviour
     }
     private void Start()
     {
- 
+        //conn_serv();
     }
 
-
+    private void conn_serv()
+    {
+        try
+        {
+            conn_sock = new TcpClient(server_ip, server_port);
+            stream = conn_sock.GetStream();
+            Console.WriteLine("서버에 연결되었습니다.");
+        }
+        catch (Exception e)
+        {
+            Debug.Log("Client Connect Exception " + e);
+        }
+    }
 
     // Start is called before the first frame update
     void Update()
@@ -108,6 +125,13 @@ public class PlayerAction : MonoBehaviour
 
         }
 
+        if(Input.GetKeyDown(KeyCode.Q) == true)
+        {
+            string msg = "0";
+            byte[] data = Encoding.UTF8.GetBytes(msg);
+
+            stream.Write(data, 0, data.Length);
+        }
 
     }
 

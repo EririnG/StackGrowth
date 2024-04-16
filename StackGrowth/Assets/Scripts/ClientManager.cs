@@ -185,10 +185,7 @@ public class ClientManager : MonoBehaviour
         int res = ReadData();
         if (res == 0)
         {
-            suc_post_panel.gameObject.SetActive(true);
-            post_title.text = "";
-            post_author.text = "";
-            post_content.text = "";
+            suc_reg_panel.gameObject.SetActive(true);
         }
         else
             Debug.Log("¹º°¡ Àß¸ø´ï");
