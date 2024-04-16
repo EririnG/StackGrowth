@@ -314,7 +314,6 @@ void open_proc(SOCKET cli_sock)
 		sprintf_s(query, "SELECT * FROM erin_db.post LIMIT 1 OFFSET %d", i);
 		if (!mysql_query(&mysql, query))
 		{
-			cout << "게시글 만들기 성공" << endl;
 			send(cli_sock, "0", 1, 0);
 		}
 		else
@@ -332,21 +331,17 @@ void open_proc(SOCKET cli_sock)
 
 void make_proc(SOCKET cli_sock, char* buf)
 {
-	strcat_s(read_buf, buf);
-	cout << "read buf : " << read_buf << endl;
-	char* idx = NULL;
-	char* ex = NULL;
-	idx = strtok_s(buf, "/",&ex);
-
-	cout << idx << endl;
-	cout << ex << endl;
 	char query[1024];
+	char* id = NULL;
+	char* gar = NULL;
+	id = strtok_s(buf, "/", &gar);
+	cout << "id :" << id << endl;
+	cout << "id :" << gar << endl;
 	MYSQL_RES* result;
 	MYSQL_ROW row;
-	MYSQL_FIELD* field;
 
-	sprintf_s(query, "SELECT * FROM erin_db.post LIMIT 1 OFFSET %s", idx);
 
+	sprintf_s(query, "SELECT * FROM erin_db.post WHERE id = '%s'", id);
 	if (!mysql_query(&mysql, query))
 	{
 		cout << "게시글 만들기 성공" << endl;
@@ -359,8 +354,9 @@ void make_proc(SOCKET cli_sock, char* buf)
 	result = mysql_store_result(&mysql);
 	row = mysql_fetch_row(result);
 	char buffer[1024];
-	sprintf_s(buffer, "%s/%s/%s/%s", row[0], row[1], row[2], row[3]);
+	sprintf_s(buffer, "%s/%s/%s/%s/", row[0], row[1], row[2], row[3]);
 	send(cli_sock, buffer, strlen(buffer), 0);
+
 }
 
 

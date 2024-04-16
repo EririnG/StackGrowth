@@ -47,6 +47,8 @@ public class ClientManager : MonoBehaviour
 
     public GameObject suc_post_panel;
 
+    public TextMeshProUGUI id;
+
 
     private spawner postManagerInstance;
     // sever
@@ -237,6 +239,31 @@ public class ClientManager : MonoBehaviour
         }
     }
 
+    public void make_post(GameObject _object)
+    {
+        id =_object.transform.Find("id").GetComponent<TextMeshProUGUI>();
+        
+        if (conn_sock == null)
+        {
+            return;
+        }
+        try
+        {
+            string msg = "25"+"/"+id.text;
+            byte[] data = Encoding.UTF8.GetBytes(msg);
+
+            stream.Write(data, 0, data.Length);
+
+            Console.WriteLine("데이터를 서버로 전송했습니다.");
+        }
+        catch (SocketException e)
+        {
+            Debug.Log("Socket Exception " + e);
+        }
+        string read_data = ReadData_str();
+        postManagerInstance.spawn_post(read_data);
+        Debug.Log("read data" + read_data);
+    }
 
     int ReadData()
     {
