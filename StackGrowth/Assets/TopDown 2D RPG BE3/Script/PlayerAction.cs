@@ -11,8 +11,10 @@ public class PlayerAction : MonoBehaviour
     Rigidbody2D rigid;
     Vector3 dirVec;
     GameObject scanObject;
-    public GameObject Player;
+
+    public GameObject Player;//unity에서 직접 연결해줌
     public GameObject uiPost;
+    public GameObject uiBoard;
 
     public float Speed;
     float x;
@@ -76,12 +78,23 @@ public class PlayerAction : MonoBehaviour
         else if(xDown && x == 1)
             dirVec = Vector3.right;
 
+
         //Scanf Object
-        if(Input.GetButtonDown("Jump") && scanObject != null)
+        if (Input.GetButtonDown("Jump") && scanObject != null)
         {
-            uiPost.SetActive(true);
-            Rigidbody2D playerRigid = Player.GetComponent<Rigidbody2D>();
-            playerRigid.constraints = RigidbodyConstraints2D.FreezeAll;
+            if ( scanObject.name == "Table")
+            {
+                uiPost.SetActive(true);
+                Rigidbody2D playerRigid = Player.GetComponent<Rigidbody2D>();
+                playerRigid.constraints = RigidbodyConstraints2D.FreezeAll;
+            }
+            else if( scanObject.name  == "Board")
+            {
+                uiBoard.SetActive(true);
+                Rigidbody2D playerRigid = Player.GetComponent<Rigidbody2D>();
+                playerRigid.constraints = RigidbodyConstraints2D.FreezeAll;
+            }
+
         }
     }
 
@@ -108,7 +121,7 @@ public class PlayerAction : MonoBehaviour
         
     }
 
-    public void melt()
+    public void melt()// X 버튼 클릭시 플레이어 다시 움직이게 melt
     {
         Rigidbody2D playerRigid = Player.GetComponent<Rigidbody2D>();
         playerRigid.constraints = RigidbodyConstraints2D.None;
