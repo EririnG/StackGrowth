@@ -11,7 +11,7 @@ using TMPro;
 using System.Threading.Tasks;
 using UnityEngine.SceneManagement;
 
-public class Auth : MonoBehaviour
+public class Auth : SingleTonBehaviour<Auth>
 {
     [SerializeField]
     TMP_InputField login_id_field;

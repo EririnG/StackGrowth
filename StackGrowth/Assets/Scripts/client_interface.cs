@@ -28,7 +28,7 @@ public class client_interface:MonoBehaviour
         }
     }
 
-    private void send()
+    private void dsadsa_send()
     {
         if(conn_sock == null)
         {
@@ -56,7 +56,7 @@ public class client_interface:MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.A) == true)
         {
-            send();
+            
             Debug.Log("Send Packet from Client");
         }
     }

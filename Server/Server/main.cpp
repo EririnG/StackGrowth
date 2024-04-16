@@ -41,6 +41,7 @@ static bool dead_flag = false;
 // 총 소켓 수를 체크하는 변수
 int total_sockets = 0;
 
+int scene = 1;
 int check = 0;
 
 
@@ -107,6 +108,7 @@ void login_proc(SOCKET cli_sock ,char* buf)
 		return;
 
 	send(cli_sock, "0", 1, 0);
+	scene = 0;
 }
 
 void vaildate_log_id(SOCKET cli_sock, char* id)
@@ -341,7 +343,7 @@ int main(int argc, char* argv[])
 		// 클라이언트와 데이터 통신
 		char buf[BUFSIZE + 1];
 		
-		while (1)
+		while (scene)
 		{
 			int recv_size = recv(cli_sock, buf, BUFSIZE, 0);
 			string msg = buf;
@@ -357,21 +359,6 @@ int main(int argc, char* argv[])
 
 			p_proc(cli_sock, buf);
 
-		/*	char* p_id;
-			char* data = NULL;
-			p_id =  strtok_s(buf, "/", &data);
-			
-
-			char* id = NULL;
-			char* pw = NULL;
-
-			cout << "Recv ID : " << id << endl;
-			cout << "Recv PW : " << pw << endl;
-
-			cout << "Recv Data : " << buf << endl;
-			cout << "Recv Len : " << recv_size << endl;
-			int result_code = send(cli_sock, buf, recv_size, 0);*/
-			
 
 			/*while (recv_size >= PACKET_HEADER_SIZE)
 			{
@@ -383,9 +370,9 @@ int main(int argc, char* argv[])
 				recv_size -= p_header->total_size;
 			}*/
 		}
-
+		scene = 1;
 		closesocket(cli_sock);
-		printf("[TCP 서버] 클라이언트 종류 : IP 주소 : %s, 포트 번호 : %d\n", cli_ip, ntohs(cli_addr.sin_port));
+		printf("[TCP 서버] 클라이언트 종료 : IP 주소 : %s, 포트 번호 : %d\n", cli_ip, ntohs(cli_addr.sin_port));
 	}
 
 	closesocket(listen_sock);
