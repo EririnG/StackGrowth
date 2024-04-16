@@ -38,10 +38,9 @@ public class PlayerAction : MonoBehaviour
         anim = GetComponent<Animator>();
         
     }
-
     private void Start()
     {
-        conn_serv();
+        //conn_serv();
     }
 
     private void conn_serv()
