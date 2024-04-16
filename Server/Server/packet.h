@@ -4,6 +4,7 @@ enum class PACKET_ID : short
 {
 	REGISTER = 21,
 	LOGIN = 22,
+	POST = 23,
 
 	RES = 31,
 };
