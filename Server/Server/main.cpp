@@ -113,7 +113,7 @@ void register_proc(SOCKET cli_sock, char* buf)
 	cout << "pw : " << pw << endl;
 
 
-	vaildate_register(cli_sock,nick, id);
+	vaildate_nickname(cli_sock,nick, id);
 
 	/*strcpy(query, "INSERT INTO 'erin_db' ('name','id','pw') VALUSE ('%s','%s','%s')", nick, id, pw);*/
 	sprintf_s(query, "INSERT INTO `erin_db`.`user_info` (`name`,`id`,`pw`) VALUES ('%s','%s','%s')", nick, id, pw);
@@ -128,7 +128,7 @@ void register_proc(SOCKET cli_sock, char* buf)
 	}
 }
 
-void vaildate_register(SOCKET cli_sock, char* nick, char* id)
+void vaildate_nickname(SOCKET cli_sock, char* nick, char* id)
 {
 	char query[1024];
 	int rowCount;
@@ -153,9 +153,37 @@ void vaildate_register(SOCKET cli_sock, char* nick, char* id)
 	{
 		send(cli_sock, "1", 1, 0);
 	}
-
 	exit(1);
 }
+
+void vaildate_id(SOCKET cli_sock, char* nick, char* id)
+{
+	char query[1024];
+	int rowCount;
+	MYSQL_RES* result;
+	MYSQL_ROW row;
+
+	// 닉네임 중복 검사
+	sprintf_s(query, "SELECT COUNT(*) FROM erin_db.user_info WHERE name = '%s'", nick);
+	if (!mysql_query(&mysql, query))
+	{
+		cout << "닉네임 검사 성공" << endl;
+	}
+	else
+	{
+		cout << "닉네임 검사 실패\n에러 원인 :" << mysql_error(&mysql) << endl;
+	}
+	result = mysql_store_result(&mysql);
+	row = mysql_fetch_row(result);
+	rowCount = std::stoi(row[0]);
+	cout << rowCount << endl;
+	if (rowCount > 0)
+	{
+		send(cli_sock, "1", 1, 0);
+	}
+	exit(1);
+}
+
 
 void p_proc(SOCKET cli_sock, char* buf)
 {

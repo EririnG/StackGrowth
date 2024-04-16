@@ -8,6 +8,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 using TMPro;
+using System.Threading.Tasks;
 
 
 public class Auth : MonoBehaviour
@@ -25,14 +26,18 @@ public class Auth : MonoBehaviour
     [SerializeField]
     TMP_InputField register_pw_repeat_field;
 
+    public GameObject suc_reg_panel;
     public GameObject pw_check_panel;
+    public GameObject nick_check_panel;
+    public GameObject id_check_panel;
 
     public string server_ip = "127.0.0.1";
     public int server_port = 50002;
     private TcpClient conn_sock;
+    NetworkStream stream;
 
     // Start is called before the first frame update
-    
+
     void Start()
     {
         conn_serv();
@@ -43,6 +48,7 @@ public class Auth : MonoBehaviour
         try
         {
             conn_sock = new TcpClient(server_ip, server_port);
+            stream = conn_sock.GetStream();
             Console.WriteLine("서버에 연결되었습니다.");
         }
         catch (Exception e)
@@ -59,15 +65,13 @@ public class Auth : MonoBehaviour
         }
         try
         {
-            NetworkStream stream = conn_sock.GetStream();
-
             string msg = 22 + "/" + login_id_field.text + "/" + login_pw_field.text;
             byte[] data = Encoding.UTF8.GetBytes(msg);
 
             stream.Write(data, 0, data.Length);
-            
+
             Console.WriteLine("데이터를 서버로 전송했습니다.");
-            
+
             //stream.Close();
             //conn_sock.Close();
         }
@@ -79,7 +83,7 @@ public class Auth : MonoBehaviour
 
     private void send_register_msg()
     {
-        if(register_pw_field.text != register_pw_repeat_field.text)
+        if (register_pw_field.text != register_pw_repeat_field.text)
         {
             pw_check_panel.gameObject.SetActive(true);
         }
@@ -91,9 +95,6 @@ public class Auth : MonoBehaviour
             }
             try
             {
-                NetworkStream stream = conn_sock.GetStream();
-
-
                 string msg = 21 + "/" + register_nick_field.text + "/" + register_id_field.text + "/" + register_pw_field.text;
                 byte[] data = Encoding.UTF8.GetBytes(msg);
 
@@ -109,13 +110,33 @@ public class Auth : MonoBehaviour
                 Debug.Log("Socket Exception " + e);
             }
         }
-        
+
+        int res = ReadData();
+        switch (res)
+        {
+            case 0:
+                suc_reg_panel.gameObject.SetActive(true); 
+                break;
+            case 1:
+                nick_check_panel.gameObject.SetActive(true);
+                break;
+            case 2:
+                id_check_panel.gameObject.SetActive(true);
+                break;
+            default:
+                break;
+        }
     }
 
+    int ReadData()
+    {
+        byte[] buffer = new byte[1024];
+        int res = stream.Read(buffer, 0, buffer.Length);
+        return res;
+    }
 
-
-    // Update is called once per frame
-    void Update()
+// Update is called once per frame
+void Update()
     {
         
     }
@@ -129,5 +150,6 @@ public class Auth : MonoBehaviour
     {
         send_register_msg();
     }
+
 
 }
