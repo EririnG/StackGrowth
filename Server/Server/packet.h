@@ -5,6 +5,8 @@ enum class PACKET_ID : short
 	REGISTER = 21,
 	LOGIN = 22,
 	POST = 23,
+	OPENPOST = 24,
+	MAKEPOST = 25,
 
 	RES = 31,
 };

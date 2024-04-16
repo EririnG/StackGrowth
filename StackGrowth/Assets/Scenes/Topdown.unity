@@ -2990,7 +2990,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 748887141}
   m_HandleRect: {fileID: 748887140}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -12999,8 +12999,6 @@ MonoBehaviour:
   uiPost: {fileID: 877401589}
   uiBoard: {fileID: 1175012153}
   Speed: 3
-  server_ip: 127.0.0.1
-  server_port: 50002
 --- !u!212 &1884682054
 SpriteRenderer:
   m_ObjectHideFlags: 0

@@ -10,6 +10,7 @@ using System.Text;
 using TMPro;
 using System.Threading.Tasks;
 using UnityEngine.SceneManagement;
+using Unity.VisualScripting;
 
 //public class ClientManager : SingleTonBehaviour<ClientManager>
 public class ClientManager : MonoBehaviour
@@ -192,7 +193,44 @@ public class ClientManager : MonoBehaviour
         }
         else
             Debug.Log("뭔가 잘못댐");
+    }
 
+    public void open_post()
+    {
+        if (conn_sock == null)
+        {
+            return;
+        }
+        try
+        {
+            string msg = "24";
+            byte[] data = Encoding.UTF8.GetBytes(msg);
+
+            stream.Write(data, 0, data.Length);
+
+            Console.WriteLine("데이터를 서버로 전송했습니다.");
+        }
+        catch (SocketException e)
+        {
+            Debug.Log("Socket Exception " + e);
+        }
+        //int res = ReadData();
+        // make 부분
+        
+        string read_data = ReadData_str();
+        string[] parts = read_data.Split('/');
+        Debug.Log(parts.Length);
+        read_data = "";
+        for(int i = 1; i < parts.Length; i++)
+        {
+            read_data = read_data + parts[i - 1] + "/";
+            if (i % 4 == 0)
+            {
+                //spawner.Instance.spawn(read_data);
+                Debug.Log(read_data);
+            }
+                
+        }
     }
 
 
@@ -204,8 +242,17 @@ public class ClientManager : MonoBehaviour
         Debug.Log(data);
         return int.Parse(data);
     }
+    string ReadData_str()
+    {
+        byte[] buffer = new byte[1024];
+        stream.Read(buffer, 0, buffer.Length);
+        string data = Encoding.UTF8.GetString(buffer);
+        Debug.Log(data);
+        return data;
+    }
 
-// Update is called once per frame
+
+    // Update is called once per frame
     void Update()
     {
         
@@ -225,6 +272,7 @@ public class ClientManager : MonoBehaviour
     {
         send_post_msg();
     }
+
 
     IEnumerator LoadNextSceneDelay(float delay)
     {

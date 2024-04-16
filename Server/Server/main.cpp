@@ -43,7 +43,7 @@ int total_sockets = 0;
 
 int scene = 1;
 int check = 0;
-
+char read_buf[1024];
 // 소켓 함수 오류 출력 후 종류
 void err_quit(const char* msg)
 {
@@ -93,7 +93,6 @@ void login_proc(SOCKET cli_sock ,char* buf)
 {
 	char* id = NULL;
 	char* pw = NULL;
-	char query[1024];
 	id = strtok_s(buf, "/", &pw);
 
 	cout << "Recv ID : " << id << endl;
@@ -287,6 +286,83 @@ void post_proc(SOCKET cli_sock, char* buf)
 	}
 }
 
+void open_proc(SOCKET cli_sock)
+{
+	char query[1024];
+	MYSQL_RES* result;
+	MYSQL_ROW row;
+
+	sprintf_s(query, "SELECT COUNT(*) FROM erin_db.post");
+
+	if (!mysql_query(&mysql, query))
+	{
+		cout << "게시글 개수 조회 성공" << endl;
+		send(cli_sock, "0", 1, 0);
+	}
+	else
+	{
+		cout << "게시글 개수 조회\n에러 원인 :" << mysql_error(&mysql) << endl;
+	}
+
+	result = mysql_store_result(&mysql);
+	row = mysql_fetch_row(result);
+	/*send(cli_sock, row[0], 1, 0);*/
+	int idx = atoi(row[0]);
+
+	for (int i = 0; i < idx; ++i)
+	{
+		sprintf_s(query, "SELECT * FROM erin_db.post LIMIT 1 OFFSET %d", i);
+		if (!mysql_query(&mysql, query))
+		{
+			cout << "게시글 만들기 성공" << endl;
+			send(cli_sock, "0", 1, 0);
+		}
+		else
+		{
+			cout << "게시글 만들기\n에러 원인 :" << mysql_error(&mysql) << endl;
+		}
+		result = mysql_store_result(&mysql);
+		row = mysql_fetch_row(result);
+		char buffer[1024];
+		sprintf_s(buffer, "%s/%s/%s/%s/", row[0], row[1], row[2], row[3]);
+		send(cli_sock, buffer, strlen(buffer), 0);
+	}
+
+}
+
+void make_proc(SOCKET cli_sock, char* buf)
+{
+	strcat_s(read_buf, buf);
+	cout << "read buf : " << read_buf << endl;
+	char* idx = NULL;
+	char* ex = NULL;
+	idx = strtok_s(buf, "/",&ex);
+
+	cout << idx << endl;
+	cout << ex << endl;
+	char query[1024];
+	MYSQL_RES* result;
+	MYSQL_ROW row;
+	MYSQL_FIELD* field;
+
+	sprintf_s(query, "SELECT * FROM erin_db.post LIMIT 1 OFFSET %s", idx);
+
+	if (!mysql_query(&mysql, query))
+	{
+		cout << "게시글 만들기 성공" << endl;
+		send(cli_sock, "0", 1, 0);
+	}
+	else
+	{
+		cout << "게시글 만들기\n에러 원인 :" << mysql_error(&mysql) << endl;
+	}
+	result = mysql_store_result(&mysql);
+	row = mysql_fetch_row(result);
+	char buffer[1024];
+	sprintf_s(buffer, "%s/%s/%s/%s", row[0], row[1], row[2], row[3]);
+	send(cli_sock, buffer, strlen(buffer), 0);
+}
+
 
 void p_proc(SOCKET cli_sock, char* buf)
 {
@@ -294,21 +370,25 @@ void p_proc(SOCKET cli_sock, char* buf)
 	char* data = NULL;
 	p_id = strtok_s(buf, "/", &data);
 
-
+	
 
 	switch (stoi(p_id))
 	{
 	case static_cast<int>(PACKET_ID::REGISTER):
 		register_proc(cli_sock,data);
 		break;
-
 	case static_cast<int>(PACKET_ID::LOGIN):
 		login_proc(cli_sock,data);
 		break;
 	case static_cast<int>(PACKET_ID::POST):
 		post_proc(cli_sock, data);
 		break;
-
+	case static_cast<int>(PACKET_ID::OPENPOST):
+		open_proc(cli_sock);
+		break;
+	case static_cast<int>(PACKET_ID::MAKEPOST):
+		make_proc(cli_sock, data);
+		break;
 	default:
 		break;
 	}
@@ -385,7 +465,7 @@ int main(int argc, char* argv[])
 				buf[recv_size] = '\0';
 
 			printf("[recv : %d]\n", recv_size);
-
+			cout << buf << endl;
 			p_proc(cli_sock, buf);
 
 

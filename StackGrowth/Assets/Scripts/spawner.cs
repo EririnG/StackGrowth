@@ -5,10 +5,15 @@ using UnityEngine.UIElements;
 
 public class spawner : MonoBehaviour
 {
+    public static spawner Instance;
     public GameObject post;
     public Transform spawn_point;
     int spacing = 10;
     // Start is called before the first frame update
+    private void Awake()
+    {
+        Instance = this;
+    }
     void Start()
     {
         
@@ -17,13 +22,13 @@ public class spawner : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Space))
-        {
-            spawn();
-        }
+        //if(Input.GetKeyDown(KeyCode.Space))
+        //{
+        //    spawn();
+        //}
     }
 
-    public void spawn()
+    public void spawn(string buf)
     {
         RectTransform lastPostTransform = (spawn_point.childCount > 0) ? spawn_point.GetChild(spawn_point.childCount - 1).GetComponent<RectTransform>() : null;
         GameObject instance = Instantiate(post, spawn_point);
@@ -37,5 +42,11 @@ public class spawner : MonoBehaviour
             newPostTransform.localPosition = Vector3.zero;
 
         newPostTransform.SetParent(spawn_point, false);
+
+    }
+
+    void setTitle()
+    {
+
     }
 }
