@@ -219,9 +219,6 @@ public class ClientManager : MonoBehaviour
         {
             Debug.Log("Socket Exception " + e);
         }
-        //int res = ReadData();
-        // make ºÎºÐ
-        
         string read_data = ReadData_str();
         string[] parts = read_data.Split('/');
         Debug.Log(parts.Length);

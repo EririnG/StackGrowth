@@ -68,23 +68,19 @@ public class spawner : MonoBehaviour
         button.onClick.AddListener(() => panel.SetActive(true));
     }
 
-    public void delete()
-    {
-        Destroy()
-    }
-
+   
     public void spawn_post(string buf)
     {
         string[] parts = buf.Split('/');
         GameObject instance = Instantiate(post_main, spawn_point_main);
         RectTransform newPostTransform = instance.GetComponent<RectTransform>();
+        
         newPostTransform.SetParent(spawn_point_main, false);
 
         title = instance.transform.Find("Title").GetComponent<TextMeshProUGUI>();
         author = instance.transform.Find("Author").GetComponent<TextMeshProUGUI>();
         id = instance.transform.Find("Content").GetComponent<TextMeshProUGUI>();
         Button button = instance.GetComponentInChildren<Button>();
-        //button.onClick.AddListener(clientManagerInstance.make_post);
 
         id.text = parts[3];
         title.text = parts[1];

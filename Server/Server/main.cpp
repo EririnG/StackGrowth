@@ -340,7 +340,6 @@ void make_proc(SOCKET cli_sock, char* buf)
 	MYSQL_RES* result;
 	MYSQL_ROW row;
 
-
 	sprintf_s(query, "SELECT * FROM erin_db.post WHERE id = '%s'", id);
 	if (!mysql_query(&mysql, query))
 	{
@@ -365,8 +364,6 @@ void p_proc(SOCKET cli_sock, char* buf)
 	char* p_id;
 	char* data = NULL;
 	p_id = strtok_s(buf, "/", &data);
-
-	
 
 	switch (stoi(p_id))
 	{
@@ -463,17 +460,6 @@ int main(int argc, char* argv[])
 			printf("[recv : %d]\n", recv_size);
 			cout << buf << endl;
 			p_proc(cli_sock, buf);
-
-
-			/*while (recv_size >= PACKET_HEADER_SIZE)
-			{
-				PktHeader* p_header = (PktHeader*)&buf[read_pos];
-				if (p_header->total_size > recv_size)
-					break;
-				packet_proc(cli_sock, &buf[read_pos]);
-				read_pos += p_header->total_size;
-				recv_size -= p_header->total_size;
-			}*/
 		}
 		scene = 1;
 		closesocket(cli_sock);
