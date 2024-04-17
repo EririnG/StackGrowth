@@ -12,4 +12,6 @@ void register_proc(SOCKET cli_sock, char* buf);
 void vaildate_nickname(SOCKET cli_sock, char* nick);
 void vaildate_id(SOCKET cli_sock, char* id);
 void post_proc(SOCKET cli_sock, char* buf);
+void open_proc(SOCKET cli_sock);
+void make_proc(SOCKET cli_sock, char* buf);
 void p_proc(SOCKET sock, char* buf);

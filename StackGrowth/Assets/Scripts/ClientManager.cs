@@ -10,6 +10,7 @@ using System.Text;
 using TMPro;
 using System.Threading.Tasks;
 using UnityEngine.SceneManagement;
+using Unity.VisualScripting;
 
 //public class ClientManager : SingleTonBehaviour<ClientManager>
 public class ClientManager : MonoBehaviour
@@ -46,7 +47,10 @@ public class ClientManager : MonoBehaviour
 
     public GameObject suc_post_panel;
 
+    public TextMeshProUGUI id;
 
+
+    private spawner postManagerInstance;
     // sever
 
     public string server_ip = "127.0.0.1";
@@ -59,6 +63,8 @@ public class ClientManager : MonoBehaviour
     void Start()
     {
         conn_serv();
+        GameObject postManagerObject = GameObject.Find("PostManager");
+        postManagerInstance = postManagerObject.GetComponent<spawner>();
     }
 
     private void conn_serv()
@@ -192,9 +198,72 @@ public class ClientManager : MonoBehaviour
         }
         else
             Debug.Log("뭔가 잘못댐");
-
     }
 
+    public void open_post()
+    {
+        if (conn_sock == null)
+        {
+            return;
+        }
+        try
+        {
+            string msg = "24";
+            byte[] data = Encoding.UTF8.GetBytes(msg);
+
+            stream.Write(data, 0, data.Length);
+
+            Console.WriteLine("데이터를 서버로 전송했습니다.");
+        }
+        catch (SocketException e)
+        {
+            Debug.Log("Socket Exception " + e);
+        }
+        //int res = ReadData();
+        // make 부분
+        
+        string read_data = ReadData_str();
+        string[] parts = read_data.Split('/');
+        Debug.Log(parts.Length);
+        read_data = "";
+        for(int i = 1; i < parts.Length; i++)
+        {
+            read_data = read_data + parts[i - 1] + "/";
+            if (i % 4 == 0)
+            {
+                postManagerInstance.spawn(read_data);
+                Debug.Log(read_data);
+                read_data = "";
+            }
+                
+        }
+    }
+
+    public void make_post(GameObject _object)
+    {
+        id =_object.transform.Find("id").GetComponent<TextMeshProUGUI>();
+        
+        if (conn_sock == null)
+        {
+            return;
+        }
+        try
+        {
+            string msg = "25"+"/"+id.text;
+            byte[] data = Encoding.UTF8.GetBytes(msg);
+
+            stream.Write(data, 0, data.Length);
+
+            Console.WriteLine("데이터를 서버로 전송했습니다.");
+        }
+        catch (SocketException e)
+        {
+            Debug.Log("Socket Exception " + e);
+        }
+        string read_data = ReadData_str();
+        postManagerInstance.spawn_post(read_data);
+        Debug.Log("read data" + read_data);
+    }
 
     int ReadData()
     {
@@ -204,8 +273,17 @@ public class ClientManager : MonoBehaviour
         Debug.Log(data);
         return int.Parse(data);
     }
+    string ReadData_str()
+    {
+        byte[] buffer = new byte[1024];
+        stream.Read(buffer, 0, buffer.Length);
+        string data = Encoding.UTF8.GetString(buffer);
+        Debug.Log(data);
+        return data;
+    }
 
-// Update is called once per frame
+
+    // Update is called once per frame
     void Update()
     {
         
@@ -225,6 +303,7 @@ public class ClientManager : MonoBehaviour
     {
         send_post_msg();
     }
+
 
     IEnumerator LoadNextSceneDelay(float delay)
     {
