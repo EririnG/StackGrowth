@@ -2750,7 +2750,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 748887141}
   m_HandleRect: {fileID: 748887140}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -5927,7 +5927,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 711489716}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: 
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &711489716
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14876,6 +14888,4 @@ SceneRoots:
   - {fileID: 1519353479}
   - {fileID: 1716315129}
   - {fileID: 1645943016}
-  - {fileID: 1306536476}
-  - {fileID: 1519353479}
-  - {fileID: 1421871402}
+  - {fileID: 69244932}
