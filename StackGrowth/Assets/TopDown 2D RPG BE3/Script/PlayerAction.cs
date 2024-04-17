@@ -64,12 +64,12 @@ public class PlayerAction : MonoBehaviour
 
         //Check Horizontal Move
         if(xDown)
-            isHorizonMove = true; 
+            isHorizonMove = true;
         else if(yDown)
             isHorizonMove = false;
         else if(xUp || yUp)
         {
-            isHorizonMove = x != 0;//위 아래 동시에 눌렀을 수평,수직을 동시에 눌렀을 때
+            isHorizonMove = x != 0;//수평,수직을 동시에 눌렀을 때
         }
 
         //Animation, if문이 없다면 계속 다시 실행시켜야함-> 애니메이션 초기 프레임만 계속 실행된다.
