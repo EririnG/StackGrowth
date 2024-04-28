@@ -128,6 +128,11 @@ public class PlayerAction : MonoBehaviour
         Vector2 moveVec = isHorizonMove ? new Vector2(x, 0) : new Vector2(0, y);
         rigid.velocity = moveVec * 1.2f * Speed;
 
+        // 이동하는거
+        GameObject clientManager = GameObject.Find("ClientManager");
+        clientManager.GetComponent<TcpClient>().SendMessage(clientManager.GetComponent<TcpClient>().SendUserPosition());
+        
+
         // Ray, 스캔 할 때 사용,DrawRay먼저 해보면 RayCast 구현 더 쉽다.
         Debug.DrawRay(rigid.position, dirVec * 0.7f, new Color(0, 1, 0));
         // LayerMask.GetMask("Object") Object만 Scan 가능하다.
@@ -140,7 +145,6 @@ public class PlayerAction : MonoBehaviour
         else
             scanObject = null;
 
-        
     }
 
     public void melt()// X 버튼 클릭시 플레이어 다시 움직이게 melt

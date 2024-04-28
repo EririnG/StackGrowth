@@ -62,24 +62,24 @@ public class ClientManager : MonoBehaviour
 
     void Start()
     {
-        conn_serv();
+        //conn_serv();
         GameObject postManagerObject = GameObject.Find("PostManager");
         postManagerInstance = postManagerObject.GetComponent<spawner>();
     }
 
-    private void conn_serv()
-    {
-        try
-        {
-            conn_sock = new TcpClient(server_ip, server_port);
-            stream = conn_sock.GetStream();
-            Console.WriteLine("서버에 연결되었습니다.");
-        }
-        catch (Exception e)
-        {
-            Debug.Log("Client Connect Exception " + e);
-        }
-    }
+    //private void conn_serv()
+    //{
+    //    try
+    //    {
+    //        conn_sock = new TcpClient(server_ip, server_port);
+    //        stream = conn_sock.GetStream();
+    //        Console.WriteLine("서버에 연결되었습니다.");
+    //    }
+    //    catch (Exception e)
+    //    {
+    //        Debug.Log("Client Connect Exception " + e);
+    //    }
+    //}
 
     private void send_login_msg()
     {
