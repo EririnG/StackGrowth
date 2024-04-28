@@ -20,6 +20,8 @@ public class TcpClient : MonoBehaviour
     private Vector2 playerPosition;
     public GameObject player;
     public List<GameObject> playerList;
+    public GameObject playerPool;
+
     private void Start()
     {
         userObject = GameObject.Find("Player");
@@ -64,10 +66,10 @@ public class TcpClient : MonoBehaviour
                 case (int)protocol.s_NewUser:
                     int newID = br.ReadInt();
                     Vector2 newPos = br.ReadVector2();
-                    GameObject newInstance = Instantiate(player, newPos, Quaternion.identity);
+                    GameObject newInstance = Instantiate(player, playerPool.transform.position, Quaternion.identity);
                     newInstance.GetComponent<AnotherUser>().id = newID;
                     newInstance.GetComponent<AnotherUser>().pos = newPos;
-                    //playerList.Add(newInstance);
+                    playerList.Add(newInstance);
                     break;
                 case (int)protocol.s_PlayerConnect:
                     id = br.ReadInt();
@@ -79,10 +81,11 @@ public class TcpClient : MonoBehaviour
                         int userid = br.ReadInt();
                         Vector2 uservec2 = br.ReadVector2();
                         Debug.Log("vector : " + uservec2);
-                        GameObject instance = Instantiate(player, uservec2, Quaternion.identity);
+                        GameObject instance = Instantiate(player, new Vector3(uservec2.x, uservec2.y, 0), Quaternion.identity);
+                        instance.transform.position = uservec2;
                         instance.GetComponent<AnotherUser>().id = userid;
                         instance.GetComponent<AnotherUser>().pos = uservec2;
-                        //playerList.Add(instance);
+                        playerList.Add(instance);
                     }
                     SendMessage(SendUserPosition());
                     break;
@@ -92,7 +95,7 @@ public class TcpClient : MonoBehaviour
                     foreach(GameObject user in playerList) {
                         if(user.GetComponent<AnotherUser>().id == moveUserID)
                         {
-                            user.transform.position = movePos; 
+                            user.transform.position = new Vector3(movePos.x,movePos.y,0); 
                             break;
                         }
                     }
@@ -161,7 +164,7 @@ public class TcpClient : MonoBehaviour
         ByteWriter bw = new ByteWriter(data);
         bw.WriteInt((int)protocol.c_PlayerPosition);
         bw.WriteInt(id);
-        playerPosition = gameObject.transform.position; 
+        playerPosition = GameObject.Find("Player").transform.position;
         bw.WriteVector2(playerPosition);
         return data;
     }
